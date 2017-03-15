@@ -16,6 +16,13 @@ import org.junit.runner.Result;
  * move {@link #fireTestRunStarted(Description)} and {@link #fireTestRunFinished(Result)}
  * to a separate class since they should only be called once per run.
  *
+ * <p>
+ *     运行时通知器。执行Runner.run(RunNotifier runNotifier)方法时，需要传一个RunNotifier进去，
+ *     这个RunNotifier是事件的管理器，它能帮助我们监控测试执行的情况。
+ * </p>
+ * <p>
+ *     这个类可以添加一些Listener监听器来监控测试执行情况。
+ * </p>
  * @since 4.0
  */
 public class RunNotifier {

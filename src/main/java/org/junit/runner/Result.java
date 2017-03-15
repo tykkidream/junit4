@@ -20,6 +20,11 @@ import org.junit.runner.notification.RunListener;
  * A <code>Result</code> collects and summarizes information from running multiple tests.
  * All tests are counted -- additional information is collected from tests that fail.
  *
+ * <p>
+ *     包括：所运行Test的数量，所忽略Test的数量，开始运行的时间，总运行时间，运行期间出现错误的信息；
+ *     它里面还包含一个私有内部类,该类的作用就是帮助Result记录状态的。
+ * </p>
+ *
  * @since 4.0
  */
 public class Result implements Serializable {

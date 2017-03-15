@@ -40,6 +40,10 @@ import org.junit.runners.model.Statement;
  *   <li>{@link Verifier}: fail test if object state ends up incorrect</li>
  * </ul>
  *
+ * <p>
+ *     TestRule??????????????????????????
+ * </p>
+ *
  * @since 4.9
  */
 public interface TestRule {

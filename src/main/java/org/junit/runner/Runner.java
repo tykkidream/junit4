@@ -15,6 +15,10 @@ import org.junit.runner.notification.RunNotifier;
  * will retain no reference to the test case instances, generally making them
  * available for garbage collection.
  *
+ * <p>
+ *     ????
+ * </p>
+ *
  * @see org.junit.runner.Description
  * @see org.junit.runner.RunWith
  * @since 4.0

@@ -52,6 +52,15 @@ import org.junit.runners.model.Statement;
  * BlockJUnit4ClassRunner was necessary to add new behavior, {@link Rule}s can
  * be used, which makes the extension more reusable and composable.
  *
+ * <p>
+ *     Junit4的默认测试执行器，用来运行单个测试类。，叫成Block是因为他是按顺序一个一个执行测试用例的，
+ *     Junit4中没有提供实现多线程执行的运行器。
+ * </p>
+ * <p>
+ *     测试时首要的入口是父类的{@link #run(RunNotifier)}方法。BlockJUnit4ClassRunner中的一个
+ *     主要的方法是{@link #runChild(FrameworkMethod, RunNotifier)}，也是执行测试的入口。
+ * </p>
+ *
  * @since 4.5
  */
 public class BlockJUnit4ClassRunner extends ParentRunner<FrameworkMethod> {
@@ -69,12 +78,21 @@ public class BlockJUnit4ClassRunner extends ParentRunner<FrameworkMethod> {
     // Implementation of ParentRunner
     //
 
+    /*
+    一个测试类有4个执行顺序：rules执行、afterClasses执行、beforeClasses执行、用例测试，
+    这个顺序在父类ParentRunner的run(RunNotifier)方法中规定了，而这里封闭了对真正被测试方法的执行方式。
+
+    这是执行单个测试方法的。而多个方法被测试时，由父类迭代被测方法集合，一个一个地调此方法来执行被测方法。
+    这里被测方法由FrameworkMethod封装，它们
+     */
     @Override
     protected void runChild(final FrameworkMethod method, RunNotifier notifier) {
         Description description = describeChild(method);
         if (isIgnored(method)) {
+            // 被忽略的测试方法
             notifier.fireTestIgnored(description);
         } else {
+            // 正常可被测试的方法
             runLeaf(methodBlock(method), description, notifier);
         }
     }
@@ -82,6 +100,11 @@ public class BlockJUnit4ClassRunner extends ParentRunner<FrameworkMethod> {
     /**
      * Evaluates whether {@link FrameworkMethod}s are ignored based on the
      * {@link Ignore} annotation.
+     *
+     * <p>
+     *     评估{@link FrameworkMethod}是否基于{@link Ignore}注释。就是判断被测试的方法是不是需要忽略的。
+     * </p>
+     *
      */
     @Override
     protected boolean isIgnored(FrameworkMethod child) {

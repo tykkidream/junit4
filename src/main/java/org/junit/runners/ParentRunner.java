@@ -53,6 +53,14 @@ import org.junit.validator.TestClassValidator;
  * handle annotated {@link ClassRule}s, create a composite
  * {@link Description}, and run children sequentially.
  *
+ * <p>
+ *     Junit4测试执行器的基类，它提供了一个测试器所需要的大部分功能。
+ * </p>
+ * <p>
+ *     本类实现了父类的抽象方法{@link #run(RunNotifier)}，主要将测试时的4个动作：
+ *     用例测试、beforeClasses执行、afterClasses执行、rules执行封装成一个整体，并执行。
+ *     而用例测试真正的执行方法{@link #runChild(T child, RunNotifier notifier)}得由子类实现。
+ * </p>
  * @since 4.5
  */
 public abstract class ParentRunner<T> extends Runner implements Filterable,
@@ -64,6 +72,9 @@ public abstract class ParentRunner<T> extends Runner implements Filterable,
     private final TestClass testClass;
 
     // Guarded by childrenLock
+    /**
+     * 封闭了需要真正被测试的方法。
+     */
     private volatile Collection<T> filteredChildren = null;
 
     private volatile RunnerScheduler scheduler = new RunnerScheduler() {
@@ -100,6 +111,10 @@ public abstract class ParentRunner<T> extends Runner implements Filterable,
     /**
      * Returns a {@link Description} for {@code child}, which can be assumed to
      * be an element of the list returned by {@link ParentRunner#getChildren()}
+     *
+     * <p>
+     *     ????????????????????????
+     * </p>
      */
     protected abstract Description describeChild(T child);
 
@@ -187,10 +202,15 @@ public abstract class ParentRunner<T> extends Runner implements Filterable,
      * @return {@code Statement}
      */
     protected Statement classBlock(final RunNotifier notifier) {
+        // Statement是装饰(Decorator)模式，一个操作包一个操作，层层包。
+        // 先创建被测试方法的Statement。
         Statement statement = childrenInvoker(notifier);
         if (!areAllChildrenIgnored()) {
+            // 在当前的Statement上，包上BeforeClasses的操作，得到一个新的Statement。
             statement = withBeforeClasses(statement);
+            // 在当前的Statement上，包上AfterClasses的操作，得到一个新的Statement。
             statement = withAfterClasses(statement);
+            // 在当前的Statement上，包上ClassRules的操作，得到一个新的Statement。
             statement = withClassRules(statement);
         }
         return statement;
@@ -359,7 +379,10 @@ public abstract class ParentRunner<T> extends Runner implements Filterable,
         EachTestNotifier testNotifier = new EachTestNotifier(notifier,
                 getDescription());
         try {
+            // 将被测试的类的所有的动作封装成了Statement，包括beforeClass等方法。
+            // 从这里也可以看出JUnit将测试相关的操作都理解为了Statement。
             Statement statement = classBlock(notifier);
+            // 执行测试类上的整体的测试操作。
             statement.evaluate();
         } catch (AssumptionViolatedException e) {
             testNotifier.addFailedAssumption(e);
