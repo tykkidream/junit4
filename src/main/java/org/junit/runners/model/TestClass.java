@@ -26,6 +26,30 @@ import org.junit.internal.MethodSorter;
 /**
  * Wraps a class to be run, providing method validation and annotation searching
  *
+ * <p>
+ *     这个类的作用就是解析被测试的类，只对有注解的方法和字段处理。注解类将作为Key，
+ *     类的成员（字段和方法）会被包装为{@link FrameworkField}或{@link FrameworkMethod}实例的集合作为Value，记录到Map中。
+ * </p>
+ *
+ * <p>
+ *     主要记录的信息：
+ *     <ul>
+ *         <li>
+ *             {@link #clazz}：被测试的类的Class实例。
+ *         </li>
+ *         <li>
+ *             {@link #methodsForAnnotations}：Map类型，Key是方法上的注解，Value是方法集合，方法被{@link FrameworkMethod}包装。
+ *             不可变的Map，不可变的集合。
+ *         </li>
+ *         <li>
+ *             {@link #fieldsForAnnotations}：Map类型，Key是字段上的注解，Value是字段集合，字段被{@link FrameworkField}包装。
+ *             不可变的Map，不可变的集合。
+ *         </li>
+ *
+ *     </ul>
+ *
+ * </p>
+ *
  * @since 4.5
  */
 public class TestClass implements Annotatable {
@@ -65,12 +89,14 @@ public class TestClass implements Annotatable {
         // 扫描被测试的类（包括父类）中有任何注解（不限于JUnit的注解）的方法和字段保存到methodsForAnnotations和fieldsForAnnotations中。
         scanAnnotatedMembers(methodsForAnnotations, fieldsForAnnotations);
 
+        // 将methodsForAnnotations转成不可变的Map
         this.methodsForAnnotations = makeDeeplyUnmodifiable(methodsForAnnotations);
+        // 将fieldsForAnnotations转成不可变的Map
         this.fieldsForAnnotations = makeDeeplyUnmodifiable(fieldsForAnnotations);
     }
 
     /**
-     *
+     * 扫描被测试的类（包括父类）中有任何注解（不限于JUnit的注解）的方法和字段保存到methodsForAnnotations和fieldsForAnnotations中。
      * @param methodsForAnnotations
      * @param fieldsForAnnotations
      */
@@ -97,6 +123,12 @@ public class TestClass implements Annotatable {
         return declaredFields;
     }
 
+    /**
+     * 将类的成员（被JUnit统一抽象成为了FrameworkMember对象）上的注解为Key，类成员作为Value保存到Map中。
+     * @param member
+     * @param map
+     * @param <T>
+     */
     protected static <T extends FrameworkMember<T>> void addToAnnotationLists(T member,
             Map<Class<? extends Annotation>, List<T>> map) {
         // 迭代方法上的注解
@@ -118,6 +150,12 @@ public class TestClass implements Annotatable {
         }
     }
 
+    /**
+     * 将一个Map转为不可变的Map，其中每个Value转为不可变的集合。
+     * @param source
+     * @param <T>
+     * @return
+     */
     private static <T extends FrameworkMember<T>> Map<Class<? extends Annotation>, List<T>>
             makeDeeplyUnmodifiable(Map<Class<? extends Annotation>, List<T>> source) {
         LinkedHashMap<Class<? extends Annotation>, List<T>> copy =

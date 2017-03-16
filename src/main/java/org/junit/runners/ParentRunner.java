@@ -91,7 +91,9 @@ public abstract class ParentRunner<T> extends Runner implements Filterable,
      * Constructs a new {@code ParentRunner} that will run {@code @TestClass}
      */
     protected ParentRunner(Class<?> testClass) throws InitializationError {
+        // 解析被注册的类
         this.testClass = createTestClass(testClass);
+        // 校验被解析好的的方法
         validate();
     }
 
@@ -113,7 +115,7 @@ public abstract class ParentRunner<T> extends Runner implements Filterable,
      * be an element of the list returned by {@link ParentRunner#getChildren()}
      *
      * <p>
-     *     ????????????????????????
+     *     获取测试类的元数据信息，以及方法和类的信息
      * </p>
      */
     protected abstract Description describeChild(T child);
@@ -137,7 +139,9 @@ public abstract class ParentRunner<T> extends Runner implements Filterable,
      * {@code public static void} with no arguments.
      */
     protected void collectInitializationErrors(List<Throwable> errors) {
+        // 校验BeforeClass注解的方法为public、无返回、无参数、是静态的
         validatePublicVoidNoArgMethods(BeforeClass.class, true, errors);
+        // 校验AfterClass注解的方法为public、无返回、无参数、是静态的
         validatePublicVoidNoArgMethods(AfterClass.class, true, errors);
         validateClassRules(errors);
         applyValidators(errors);
@@ -164,9 +168,12 @@ public abstract class ParentRunner<T> extends Runner implements Filterable,
      */
     protected void validatePublicVoidNoArgMethods(Class<? extends Annotation> annotation,
             boolean isStatic, List<Throwable> errors) {
+        // 从TestClass中，获取标记了指定注解的方法集合
         List<FrameworkMethod> methods = getTestClass().getAnnotatedMethods(annotation);
 
+        // 迭代每个方法
         for (FrameworkMethod eachTestMethod : methods) {
+            // 检验方法是公共的、无返回值的、无参的
             eachTestMethod.validatePublicVoidNoArg(isStatic, errors);
         }
     }
@@ -435,7 +442,9 @@ public abstract class ParentRunner<T> extends Runner implements Filterable,
     //
 
     private void validate() throws InitializationError {
+        // 错误的集合
         List<Throwable> errors = new ArrayList<Throwable>();
+
         collectInitializationErrors(errors);
         if (!errors.isEmpty()) {
             throw new InitializationError(errors);
