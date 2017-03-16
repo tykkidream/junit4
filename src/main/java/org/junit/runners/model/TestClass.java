@@ -32,7 +32,14 @@ public class TestClass implements Annotatable {
     private static final FieldComparator FIELD_COMPARATOR = new FieldComparator();
     private static final MethodComparator METHOD_COMPARATOR = new MethodComparator();
 
+    /**
+     * ?????????
+     */
     private final Class<?> clazz;
+    /**
+     * ??????????????Key?????JUnit????Value???????
+     * ?? @Before @After @Test ????
+     */
     private final Map<Class<? extends Annotation>, List<FrameworkMethod>> methodsForAnnotations;
     private final Map<Class<? extends Annotation>, List<FrameworkField>> fieldsForAnnotations;
 
@@ -45,6 +52,7 @@ public class TestClass implements Annotatable {
     public TestClass(Class<?> clazz) {
         this.clazz = clazz;
         if (clazz != null && clazz.getConstructors().length > 1) {
+            // ??????????????
             throw new IllegalArgumentException(
                     "Test class can only have one constructor");
         }
@@ -54,20 +62,30 @@ public class TestClass implements Annotatable {
         Map<Class<? extends Annotation>, List<FrameworkField>> fieldsForAnnotations =
                 new LinkedHashMap<Class<? extends Annotation>, List<FrameworkField>>();
 
+        // ???????????????????????JUnit?????????????methodsForAnnotations?fieldsForAnnotations??
         scanAnnotatedMembers(methodsForAnnotations, fieldsForAnnotations);
 
         this.methodsForAnnotations = makeDeeplyUnmodifiable(methodsForAnnotations);
         this.fieldsForAnnotations = makeDeeplyUnmodifiable(fieldsForAnnotations);
     }
 
+    /**
+     *
+     * @param methodsForAnnotations
+     * @param fieldsForAnnotations
+     */
     protected void scanAnnotatedMembers(Map<Class<? extends Annotation>, List<FrameworkMethod>> methodsForAnnotations, Map<Class<? extends Annotation>, List<FrameworkField>> fieldsForAnnotations) {
+        // ?????????????
         for (Class<?> eachClass : getSuperClasses(clazz)) {
+            // ?????????
             for (Method eachMethod : MethodSorter.getDeclaredMethods(eachClass)) {
+                // ????????????methodsForAnnotations??????????JUnit???
                 addToAnnotationLists(new FrameworkMethod(eachMethod), methodsForAnnotations);
             }
             // ensuring fields are sorted to make sure that entries are inserted
             // and read from fieldForAnnotations in a deterministic order
             for (Field eachField : getSortedDeclaredFields(eachClass)) {
+                // ????????????fieldsForAnnotations??????????JUnit???
                 addToAnnotationLists(new FrameworkField(eachField), fieldsForAnnotations);
             }
         }
@@ -81,9 +99,14 @@ public class TestClass implements Annotatable {
 
     protected static <T extends FrameworkMember<T>> void addToAnnotationLists(T member,
             Map<Class<? extends Annotation>, List<T>> map) {
+        // ????????
         for (Annotation each : member.getAnnotations()) {
+            // ?????
             Class<? extends Annotation> type = each.annotationType();
+            // ?map?????????????????????????
             List<T> members = getAnnotatedMembers(map, type, true);
+
+            // ??????????????return
             if (member.isShadowedBy(members)) {
                 return;
             }
@@ -153,6 +176,14 @@ public class TestClass implements Annotatable {
         return new ArrayList<T>(values);
     }
 
+    /**
+     *
+     * @param map
+     * @param type ?????
+     * @param fillIfAbsent ???????????????????
+     * @param <T>
+     * @return
+     */
     private static <T> List<T> getAnnotatedMembers(Map<Class<? extends Annotation>, List<T>> map,
             Class<? extends Annotation> type, boolean fillIfAbsent) {
         if (!map.containsKey(type) && fillIfAbsent) {
@@ -167,6 +198,11 @@ public class TestClass implements Annotatable {
                 || annotation.equals(BeforeClass.class);
     }
 
+    /**
+     * ????????????????????????
+     * @param testClass
+     * @return
+     */
     private static List<Class<?>> getSuperClasses(Class<?> testClass) {
         ArrayList<Class<?>> results = new ArrayList<Class<?>>();
         Class<?> current = testClass;
