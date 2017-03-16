@@ -33,12 +33,12 @@ public class TestClass implements Annotatable {
     private static final MethodComparator METHOD_COMPARATOR = new MethodComparator();
 
     /**
-     * ?????????
+     * 被测试的类的类实例
      */
     private final Class<?> clazz;
     /**
-     * ??????????????Key?????JUnit????Value???????
-     * ?? @Before @After @Test ????
+     * 测试时需要执行的方法的集合，Key为方法上的JUnit的注解，Value为方法的封装。
+     * 包括 @Before @After @Test 等注解。
      */
     private final Map<Class<? extends Annotation>, List<FrameworkMethod>> methodsForAnnotations;
     private final Map<Class<? extends Annotation>, List<FrameworkField>> fieldsForAnnotations;
@@ -52,7 +52,7 @@ public class TestClass implements Annotatable {
     public TestClass(Class<?> clazz) {
         this.clazz = clazz;
         if (clazz != null && clazz.getConstructors().length > 1) {
-            // ??????????????
+            // 被测试的类只能有一个构造函数
             throw new IllegalArgumentException(
                     "Test class can only have one constructor");
         }
@@ -62,7 +62,7 @@ public class TestClass implements Annotatable {
         Map<Class<? extends Annotation>, List<FrameworkField>> fieldsForAnnotations =
                 new LinkedHashMap<Class<? extends Annotation>, List<FrameworkField>>();
 
-        // ???????????????????????JUnit?????????????methodsForAnnotations?fieldsForAnnotations??
+        // 扫描被测试的类（包括父类）中有任何注解（不限于JUnit的注解）的方法和字段保存到methodsForAnnotations和fieldsForAnnotations中。
         scanAnnotatedMembers(methodsForAnnotations, fieldsForAnnotations);
 
         this.methodsForAnnotations = makeDeeplyUnmodifiable(methodsForAnnotations);
@@ -75,17 +75,17 @@ public class TestClass implements Annotatable {
      * @param fieldsForAnnotations
      */
     protected void scanAnnotatedMembers(Map<Class<? extends Annotation>, List<FrameworkMethod>> methodsForAnnotations, Map<Class<? extends Annotation>, List<FrameworkField>> fieldsForAnnotations) {
-        // ?????????????
+        // 迭代被测试的类及父类父父类
         for (Class<?> eachClass : getSuperClasses(clazz)) {
-            // ?????????
+            // 迭代类中的所有方法
             for (Method eachMethod : MethodSorter.getDeclaredMethods(eachClass)) {
-                // ????????????methodsForAnnotations??????????JUnit???
+                // 将每个有注解的方法保存到methodsForAnnotations中，任何注解，不限于JUnit的注解
                 addToAnnotationLists(new FrameworkMethod(eachMethod), methodsForAnnotations);
             }
             // ensuring fields are sorted to make sure that entries are inserted
             // and read from fieldForAnnotations in a deterministic order
             for (Field eachField : getSortedDeclaredFields(eachClass)) {
-                // ????????????fieldsForAnnotations??????????JUnit???
+                // 将每个有注解的字段保存到fieldsForAnnotations中，任何注解，不限于JUnit的注解
                 addToAnnotationLists(new FrameworkField(eachField), fieldsForAnnotations);
             }
         }
@@ -99,14 +99,14 @@ public class TestClass implements Annotatable {
 
     protected static <T extends FrameworkMember<T>> void addToAnnotationLists(T member,
             Map<Class<? extends Annotation>, List<T>> map) {
-        // ????????
+        // 迭代方法上的注解
         for (Annotation each : member.getAnnotations()) {
-            // ?????
+            // 注解的类型
             Class<? extends Annotation> type = each.annotationType();
-            // ?map?????????????????????????
+            // 从map中得到注解对应的方法集合，如果没有则创建一个空集合
             List<T> members = getAnnotatedMembers(map, type, true);
 
-            // ??????????????return
+            // 如果集合中已添加了此方法，则return
             if (member.isShadowedBy(members)) {
                 return;
             }
@@ -179,8 +179,8 @@ public class TestClass implements Annotatable {
     /**
      *
      * @param map
-     * @param type ?????
-     * @param fillIfAbsent ???????????????????
+     * @param type 注解的类型
+     * @param fillIfAbsent 如果注解对应的集合为空，是否创建新集合
      * @param <T>
      * @return
      */
@@ -199,7 +199,7 @@ public class TestClass implements Annotatable {
     }
 
     /**
-     * ????????????????????????
+     * 将被测试的类，及其父类，父父类等，封闭到集合中。
      * @param testClass
      * @return
      */

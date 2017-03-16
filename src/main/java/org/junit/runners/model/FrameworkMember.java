@@ -10,6 +10,11 @@ import java.util.List;
  */
 public abstract class FrameworkMember<T extends FrameworkMember<T>> implements
         Annotatable {
+    /**
+     * 判断当前方法是否已添加到某个方法集合中
+     * @param otherMember
+     * @return
+     */
     abstract boolean isShadowedBy(T otherMember);
 
     boolean isShadowedBy(List<T> members) {

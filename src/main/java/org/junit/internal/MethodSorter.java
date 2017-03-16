@@ -43,6 +43,10 @@ public class MethodSorter {
      * does, and a predictable failure is better than a random failure on
      * certain platforms. By default, uses an unspecified but deterministic order.
      *
+     * <p>
+     *     通过反射，将指定类的所有方法返回，包括public、protected、private级别的。
+     * </p>
+     *
      * @param clazz a class
      * @return same as {@link Class#getDeclaredMethods} but sorted
      * @see <a href="http://bugs.sun.com/view_bug.do?bug_id=7023180">JDK
@@ -51,6 +55,7 @@ public class MethodSorter {
     public static Method[] getDeclaredMethods(Class<?> clazz) {
         Comparator<Method> comparator = getSorter(clazz.getAnnotation(FixMethodOrder.class));
 
+        // 获取的是类的所有方法，包含public、protected和private方法
         Method[] methods = clazz.getDeclaredMethods();
         if (comparator != null) {
             Arrays.sort(methods, comparator);

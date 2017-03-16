@@ -182,6 +182,9 @@ public class FrameworkMethod extends FrameworkMember<FrameworkMethod> {
 
     /**
      * Returns the annotations on this method
+     * <p>
+     *     返回当前方法上的注解
+     * </p>
      */
     public Annotation[] getAnnotations() {
         return method.getAnnotations();
